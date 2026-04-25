@@ -1,10 +1,15 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
+# Kill any stale processes on our ports before starting
+lsof -ti:8000 | xargs kill -9 2>/dev/null
+lsof -ti:5173 | xargs kill -9 2>/dev/null
+sleep 0.5
+
 echo "Starting backend..."
 cd backend
-source .venv/bin/activate 2>/dev/null || pip3 install fastapi uvicorn pydantic yfinance httpx -q
-uvicorn app.main:app --reload --port 8000 &
+source .venv/bin/activate 2>/dev/null
+python3 -m uvicorn app.main:app --reload --port 8000 &
 BACKEND_PID=$!
 
 echo "Starting frontend..."

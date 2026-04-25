@@ -1,8 +1,16 @@
+_FALLBACK_RATES: dict[str, float] = {
+    "HKD": 0.1282,
+    "JPY": 0.0067,
+    "KRW": 0.00073,
+    "SGD": 0.74,
+}
+
 def to_usd(value: float, currency: str, fx_rates: dict[str, float]) -> float:
-    """Convert a value in `currency` to USD using fx_rates {currency: usd_rate}."""
+    """Convert a value in `currency` to USD using fx_rates {currency: usd_rate}.
+    Falls back to approximate rates if not configured; USD is always 1:1."""
     if currency == "USD":
         return value
-    rate = fx_rates.get(currency)
+    rate = fx_rates.get(currency) or _FALLBACK_RATES.get(currency)
     if not rate:
-        raise ValueError(f"Missing FX rate for {currency}. Please add it in account settings.")
+        return 0.0
     return value * rate

@@ -16,12 +16,24 @@ const BLANK: Omit<StockPosition, 'id'> = {
   initial_margin_rate: 0.50, maintenance_margin_rate: 0.25,
 }
 
-interface Props { onDone?: () => void }
+interface Props {
+  onDone?: () => void
+  initial?: StockPosition
+}
 
-export function AddStockForm({ onDone }: Props) {
-  const { addStock } = usePortfolioStore()
+export function AddStockForm({ onDone, initial }: Props) {
+  const { addStock, updateStock } = usePortfolioStore()
   const { lang } = useLanguageStore()
-  const [form, setForm] = useState<Omit<StockPosition, 'id'>>(BLANK)
+  const isEdit = !!initial
+
+  const [form, setForm] = useState<Omit<StockPosition, 'id'>>(
+    initial
+      ? { symbol: initial.symbol, name: initial.name, market: initial.market,
+          shares: initial.shares, avg_cost: initial.avg_cost, current_price: initial.current_price,
+          currency: initial.currency, initial_margin_rate: initial.initial_margin_rate,
+          maintenance_margin_rate: initial.maintenance_margin_rate }
+      : BLANK
+  )
   const [loadingPrice, setLoadingPrice] = useState(false)
   const [error, setError] = useState('')
 
@@ -56,8 +68,12 @@ export function AddStockForm({ onDone }: Props) {
     if (form.shares === 0) { setError(t('股数不能为 0', 'Shares cannot be 0', lang)); return }
     if (form.current_price <= 0) { setError(t('请输入有效的当前价格', 'Please enter a valid price', lang)); return }
     setError('')
-    addStock(form)
-    setForm(BLANK)
+    if (isEdit) {
+      updateStock(initial!.id, form)
+    } else {
+      addStock(form)
+      setForm(BLANK)
+    }
     onDone?.()
   }
 
@@ -65,12 +81,14 @@ export function AddStockForm({ onDone }: Props) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          {t('搜索股票代码', 'Search Stock Symbol', lang)}
-        </label>
-        <SymbolSearch onSelect={onSelect} />
-      </div>
+      {!isEdit && (
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            {t('搜索股票代码', 'Search Stock Symbol', lang)}
+          </label>
+          <SymbolSearch onSelect={onSelect} />
+        </div>
+      )}
 
       {form.symbol && (
         <div className="bg-slate-50 rounded-lg p-4 space-y-3">
@@ -121,9 +139,9 @@ export function AddStockForm({ onDone }: Props) {
 
       <div className="flex gap-2">
         <button onClick={submit} className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-          {t('添加持仓', 'Add Position', lang)}
+          {isEdit ? t('保存修改', 'Save Changes', lang) : t('添加持仓', 'Add Position', lang)}
         </button>
-        <button onClick={() => { setForm(BLANK); onDone?.() }} className="border px-5 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+        <button onClick={() => { if (!isEdit) setForm(BLANK); onDone?.() }} className="border px-5 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
           {t('取消', 'Cancel', lang)}
         </button>
       </div>

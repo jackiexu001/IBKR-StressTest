@@ -12,12 +12,25 @@ const BLANK: Omit<FuturesPosition, 'id'> = {
   currency: 'USD', initial_margin_per_contract: 0, maintenance_margin_per_contract: 0,
 }
 
-interface Props { onDone?: () => void }
+interface Props {
+  onDone?: () => void
+  initial?: FuturesPosition
+}
 
-export function AddFuturesForm({ onDone }: Props) {
-  const { addFutures } = usePortfolioStore()
+export function AddFuturesForm({ onDone, initial }: Props) {
+  const { addFutures, updateFutures } = usePortfolioStore()
   const { lang } = useLanguageStore()
-  const [form, setForm] = useState<Omit<FuturesPosition, 'id'>>(BLANK)
+  const isEdit = !!initial
+
+  const [form, setForm] = useState<Omit<FuturesPosition, 'id'>>(
+    initial
+      ? { symbol: initial.symbol, name: initial.name, exchange: initial.exchange,
+          contracts: initial.contracts, multiplier: initial.multiplier,
+          avg_entry_price: initial.avg_entry_price, current_price: initial.current_price,
+          currency: initial.currency, initial_margin_per_contract: initial.initial_margin_per_contract,
+          maintenance_margin_per_contract: initial.maintenance_margin_per_contract }
+      : BLANK
+  )
   const [loadingPrice, setLoadingPrice] = useState(false)
   const [error, setError] = useState('')
 
@@ -59,8 +72,12 @@ export function AddFuturesForm({ onDone }: Props) {
     if (form.initial_margin_per_contract <= 0) { setError(t('请填写每合约初始保证金', 'Please enter initial margin per contract', lang)); return }
     if (form.maintenance_margin_per_contract <= 0) { setError(t('请填写每合约维持保证金', 'Please enter maintenance margin per contract', lang)); return }
     setError('')
-    addFutures(form)
-    setForm(BLANK)
+    if (isEdit) {
+      updateFutures(initial!.id, form)
+    } else {
+      addFutures(form)
+      setForm(BLANK)
+    }
     onDone?.()
   }
 
@@ -69,15 +86,17 @@ export function AddFuturesForm({ onDone }: Props) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          {t('搜索期货代码', 'Search Futures Symbol', lang)}
-        </label>
-        <SymbolSearch
-          onSelect={r => { setLoadingPrice(true); onSelect(r) }}
-          placeholder={t('输入期货代码，如 ES, NQ, HSI, NK', 'Enter futures symbol, e.g. ES, NQ, HSI, NK', lang)}
-        />
-      </div>
+      {!isEdit && (
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            {t('搜索期货代码', 'Search Futures Symbol', lang)}
+          </label>
+          <SymbolSearch
+            onSelect={r => { setLoadingPrice(true); onSelect(r) }}
+            placeholder={t('输入期货代码，如 ES, NQ, HSI, NK', 'Enter futures symbol, e.g. ES, NQ, HSI, NK', lang)}
+          />
+        </div>
+      )}
 
       {form.symbol && (
         <div className="bg-slate-50 rounded-lg p-4 space-y-3">
@@ -141,9 +160,9 @@ export function AddFuturesForm({ onDone }: Props) {
 
       <div className="flex gap-2">
         <button onClick={submit} className="bg-purple-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
-          {t('添加期货持仓', 'Add Futures Position', lang)}
+          {isEdit ? t('保存修改', 'Save Changes', lang) : t('添加期货持仓', 'Add Futures Position', lang)}
         </button>
-        <button onClick={() => { setForm(BLANK); onDone?.() }} className="border px-5 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+        <button onClick={() => { if (!isEdit) setForm(BLANK); onDone?.() }} className="border px-5 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
           {t('取消', 'Cancel', lang)}
         </button>
       </div>

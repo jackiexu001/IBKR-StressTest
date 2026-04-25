@@ -34,7 +34,6 @@ export function MetricCard({
 }: MetricCardProps) {
   const { lang } = useLanguageStore()
   const primary = lang === 'zh' ? labelZh : label
-  const secondary = lang === 'zh' ? label : labelZh
 
   return (
     <div
@@ -50,16 +49,19 @@ export function MetricCard({
           {primary}
         </span>
         {status === 'danger' && (
-          <span className="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded font-semibold">ALERT</span>
+          <span className="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded font-semibold">
+            {lang === 'zh' ? '警告' : 'ALERT'}
+          </span>
         )}
         {status === 'alert' && (
-          <span className="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded font-semibold">LOW</span>
+          <span className="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded font-semibold">
+            {lang === 'zh' ? '偏低' : 'LOW'}
+          </span>
         )}
       </div>
       <div className={cn('font-bold tabular-nums', valueStyle[status], size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-xl' : 'text-base')}>
         {value}
       </div>
-      <div className="text-xs text-slate-400">{secondary}</div>
       {subValue && <div className="text-xs text-slate-400 mt-1">{subValue}</div>}
     </div>
   )

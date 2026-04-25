@@ -7,11 +7,14 @@ import { PositionTable } from '@/components/portfolio/PositionTable'
 import { usePortfolioStore } from '@/store/portfolio'
 import { useLanguageStore, t } from '@/store/language'
 import { api } from '@/lib/api'
+import type { StockPosition, FuturesPosition } from '@/lib/types'
 
 type Panel = 'none' | 'stock' | 'futures' | 'account'
 
 export function Portfolio() {
   const [panel, setPanel] = useState<Panel>('none')
+  const [editStock, setEditStock] = useState<StockPosition | null>(null)
+  const [editFutures, setEditFutures] = useState<FuturesPosition | null>(null)
   const { stocks, futures, importPortfolio, reset, getPortfolio } = usePortfolioStore()
   const { lang } = useLanguageStore()
 
@@ -23,6 +26,28 @@ export function Portfolio() {
     enabled: hasPositions,
     staleTime: 30_000,
   })
+
+  const handleEdit = (type: 'stock' | 'futures', id: string) => {
+    if (type === 'stock') {
+      const pos = stocks.find(s => s.id === id)
+      if (pos) { setEditStock(pos); setEditFutures(null); setPanel('stock') }
+    } else {
+      const pos = futures.find(f => f.id === id)
+      if (pos) { setEditFutures(pos); setEditStock(null); setPanel('futures') }
+    }
+  }
+
+  const handlePanelOpen = (p: Panel) => {
+    setEditStock(null)
+    setEditFutures(null)
+    setPanel(panel === p ? 'none' : p)
+  }
+
+  const handleDone = () => {
+    setPanel('none')
+    setEditStock(null)
+    setEditFutures(null)
+  }
 
   const handleExport = () => {
     const { getPortfolio } = usePortfolioStore.getState()
@@ -58,15 +83,25 @@ export function Portfolio() {
     if (confirm(t('确定要清空所有持仓和账户数据吗？', 'Clear all positions and account data?', lang))) reset()
   }
 
+  const panelTitle = editStock
+    ? t(`修改股票持仓：${editStock.symbol}`, `Edit Stock: ${editStock.symbol}`, lang)
+    : editFutures
+    ? t(`修改期货持仓：${editFutures.symbol}`, `Edit Futures: ${editFutures.symbol}`, lang)
+    : panel === 'stock'
+    ? t('添加股票持仓', 'Add Stock Position', lang)
+    : panel === 'futures'
+    ? t('添加期货持仓', 'Add Futures Position', lang)
+    : t('账户设置', 'Account Setup', lang)
+
   return (
     <div className="space-y-6">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           <button
-            onClick={() => setPanel(panel === 'stock' ? 'none' : 'stock')}
+            onClick={() => handlePanelOpen('stock')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              panel === 'stock'
+              panel === 'stock' && !editStock
                 ? 'bg-blue-600 text-white'
                 : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
             }`}
@@ -74,9 +109,9 @@ export function Portfolio() {
             + {t('添加股票', 'Add Stock', lang)}
           </button>
           <button
-            onClick={() => setPanel(panel === 'futures' ? 'none' : 'futures')}
+            onClick={() => handlePanelOpen('futures')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              panel === 'futures'
+              panel === 'futures' && !editFutures
                 ? 'bg-purple-600 text-white'
                 : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
             }`}
@@ -84,7 +119,7 @@ export function Portfolio() {
             + {t('添加期货', 'Add Futures', lang)}
           </button>
           <button
-            onClick={() => setPanel(panel === 'account' ? 'none' : 'account')}
+            onClick={() => handlePanelOpen('account')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               panel === 'account'
                 ? 'bg-slate-600 text-white'
@@ -120,11 +155,12 @@ export function Portfolio() {
       {/* Expandable panel */}
       {panel !== 'none' && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-sm font-semibold text-slate-700 mb-4">{panelTitle}</h3>
           {panel === 'stock' && (
-            <AddStockForm onDone={() => setPanel('none')} />
+            <AddStockForm onDone={handleDone} initial={editStock ?? undefined} />
           )}
           {panel === 'futures' && (
-            <AddFuturesForm onDone={() => setPanel('none')} />
+            <AddFuturesForm onDone={handleDone} initial={editFutures ?? undefined} />
           )}
           {panel === 'account' && (
             <AccountSetup />
@@ -140,7 +176,11 @@ export function Portfolio() {
             {stocks.length} {t('只股票', 'stocks', lang)} · {futures.length} {t('个期货合约', 'futures', lang)}
           </span>
         </div>
-        <PositionTable positionDetails={metrics?.per_position} showDelete={true} />
+        <PositionTable
+          positionDetails={metrics?.per_position}
+          showDelete={true}
+          onEdit={handleEdit}
+        />
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import type { StockPosition, FuturesPosition } from '@/lib/types'
 interface Props {
   positionDetails?: PositionDetail[]
   showDelete?: boolean
+  onEdit?: (type: 'stock' | 'futures', id: string) => void
 }
 
 // Chinese convention: profit = red, loss = green
@@ -16,7 +17,7 @@ const pnlCls = (v: number) => v >= 0 ? 'text-red-600' : 'text-green-600'
 const thCls = 'px-3 py-2 text-center text-xs text-slate-500 uppercase font-medium'
 const tdCls = 'px-3 py-2 text-center tabular-nums text-sm'
 
-export function PositionTable({ positionDetails, showDelete = false }: Props) {
+export function PositionTable({ positionDetails, showDelete = false, onEdit }: Props) {
   const { stocks, futures, removeStock, removeFutures, updateStock, updateFutures } = usePortfolioStore()
   const { lang } = useLanguageStore()
 
@@ -48,13 +49,13 @@ export function PositionTable({ positionDetails, showDelete = false }: Props) {
             <th className={thCls}>{t('成本价', 'Avg Cost', lang)}</th>
             <th className={thCls}>{t('现价', 'Price', lang)}</th>
             <th className={thCls}>{t('市值/名义值(USD)', 'Mkt/Notl(USD)', lang)}</th>
-            <th className={thCls}>FX</th>
+            <th className={thCls}>{t('汇率', 'FX Rate', lang)}</th>
             <th className={thCls}>{t('浮盈亏(原币)', 'P&L(Native)', lang)}</th>
             <th className={thCls}>{t('浮盈亏(USD)', 'P&L(USD)', lang)}</th>
-            <th className={thCls}>IM(USD)</th>
-            <th className={thCls}>MM(USD)</th>
+            <th className={thCls}>{t('初始保证金(USD)', 'IM(USD)', lang)}</th>
+            <th className={thCls}>{t('维持保证金(USD)', 'MM(USD)', lang)}</th>
             <th className={thCls}>{t('占比%', 'Wt%', lang)}</th>
-            {showDelete && <th className={thCls}></th>}
+            {(showDelete || onEdit) && <th className={thCls}></th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -98,11 +99,18 @@ export function PositionTable({ positionDetails, showDelete = false }: Props) {
                   <td className={`${tdCls} text-slate-500`}>{detail ? fmtUSD(detail.initial_margin_usd) : '—'}</td>
                   <td className={`${tdCls} text-slate-500`}>{detail ? fmtUSD(detail.maint_margin_usd) : '—'}</td>
                   <td className={`${tdCls} text-slate-400`}>{detail ? `${detail.pct_of_total_margin.toFixed(1)}%` : '—'}</td>
-                  {showDelete && (
-                    <td className={tdCls}>
-                      <button onClick={() => removeStock(p.id)} className="text-red-400 hover:text-red-600 text-xs">
-                        {t('删除', 'Del', lang)}
-                      </button>
+                  {(showDelete || onEdit) && (
+                    <td className={`${tdCls} whitespace-nowrap`}>
+                      {onEdit && (
+                        <button onClick={() => onEdit('stock', p.id)} className="text-blue-400 hover:text-blue-600 text-xs mr-2">
+                          {t('修改', 'Edit', lang)}
+                        </button>
+                      )}
+                      {showDelete && (
+                        <button onClick={() => removeStock(p.id)} className="text-red-400 hover:text-red-600 text-xs">
+                          {t('删除', 'Del', lang)}
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>
@@ -146,11 +154,18 @@ export function PositionTable({ positionDetails, showDelete = false }: Props) {
                   <td className={`${tdCls} text-slate-500`}>{detail ? fmtUSD(detail.initial_margin_usd) : '—'}</td>
                   <td className={`${tdCls} text-slate-500`}>{detail ? fmtUSD(detail.maint_margin_usd) : '—'}</td>
                   <td className={`${tdCls} text-slate-400`}>{detail ? `${detail.pct_of_total_margin.toFixed(1)}%` : '—'}</td>
-                  {showDelete && (
-                    <td className={tdCls}>
-                      <button onClick={() => removeFutures(p.id)} className="text-red-400 hover:text-red-600 text-xs">
-                        {t('删除', 'Del', lang)}
-                      </button>
+                  {(showDelete || onEdit) && (
+                    <td className={`${tdCls} whitespace-nowrap`}>
+                      {onEdit && (
+                        <button onClick={() => onEdit('futures', p.id)} className="text-blue-400 hover:text-blue-600 text-xs mr-2">
+                          {t('修改', 'Edit', lang)}
+                        </button>
+                      )}
+                      {showDelete && (
+                        <button onClick={() => removeFutures(p.id)} className="text-red-400 hover:text-red-600 text-xs">
+                          {t('删除', 'Del', lang)}
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>

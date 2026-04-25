@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { useLanguageStore } from '@/store/language'
 
 type Status = 'safe' | 'warn' | 'alert' | 'danger' | 'neutral'
 
@@ -31,6 +32,10 @@ const valueStyle: Record<Status, string> = {
 export function MetricCard({
   label, labelZh, value, subValue, status = 'neutral', size = 'md', tooltip,
 }: MetricCardProps) {
+  const { lang } = useLanguageStore()
+  const primary = lang === 'zh' ? labelZh : label
+  const secondary = lang === 'zh' ? label : labelZh
+
   return (
     <div
       className={cn(
@@ -41,8 +46,8 @@ export function MetricCard({
       title={tooltip}
     >
       <div className="flex items-center justify-between">
-        <span className={cn('font-mono text-xs text-slate-500 uppercase tracking-wide', size === 'lg' && 'text-sm')}>
-          {label}
+        <span className={cn('font-semibold text-xs text-slate-700 uppercase tracking-wide', size === 'lg' && 'text-sm')}>
+          {primary}
         </span>
         {status === 'danger' && (
           <span className="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded font-semibold">ALERT</span>
@@ -54,7 +59,7 @@ export function MetricCard({
       <div className={cn('font-bold tabular-nums', valueStyle[status], size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-xl' : 'text-base')}>
         {value}
       </div>
-      <div className="text-xs text-slate-500">{labelZh}</div>
+      <div className="text-xs text-slate-400">{secondary}</div>
       {subValue && <div className="text-xs text-slate-400 mt-1">{subValue}</div>}
     </div>
   )

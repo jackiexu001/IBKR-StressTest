@@ -1,5 +1,6 @@
 import { MetricCard } from './MetricCard'
 import { fmtUSD, fmtPct, exliqStatus } from '@/lib/utils'
+import { useLanguageStore, t } from '@/store/language'
 import type { Metrics } from '@/lib/types'
 
 interface MetricsDashboardProps {
@@ -8,6 +9,7 @@ interface MetricsDashboardProps {
 
 export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
   const status = exliqStatus(m)
+  const { lang } = useLanguageStore()
 
   return (
     <div className="space-y-4">
@@ -117,15 +119,15 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
             <tr>
-              <th className="text-left px-4 py-2">分部</th>
-              <th className="text-right px-4 py-2">Excess Liquidity</th>
-              <th className="text-right px-4 py-2">Initial Margin</th>
-              <th className="text-right px-4 py-2">Maint. Margin</th>
+              <th className="text-left px-4 py-2">{t('分部', 'Segment', lang)}</th>
+              <th className="text-right px-4 py-2">{t('剩余流动性', 'Excess Liquidity', lang)}</th>
+              <th className="text-right px-4 py-2">{t('初始保证金', 'Initial Margin', lang)}</th>
+              <th className="text-right px-4 py-2">{t('维持保证金', 'Maint. Margin', lang)}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             <tr className="hover:bg-slate-50">
-              <td className="px-4 py-2 font-medium">Securities（股票）</td>
+              <td className="px-4 py-2 font-medium">{t('证券（股票）', 'Securities', lang)}</td>
               <td className={`text-right px-4 py-2 tabular-nums ${m.securities_excess_liquidity < 0 ? 'text-red-600 font-bold' : 'text-slate-700'}`}>
                 {fmtUSD(m.securities_excess_liquidity)}
               </td>
@@ -133,7 +135,7 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
               <td className="text-right px-4 py-2 tabular-nums text-slate-600">{fmtUSD(m.stock_maint_margin)}</td>
             </tr>
             <tr className="hover:bg-slate-50">
-              <td className="px-4 py-2 font-medium">Commodities（期货）</td>
+              <td className="px-4 py-2 font-medium">{t('商品（期货）', 'Commodities', lang)}</td>
               <td className={`text-right px-4 py-2 tabular-nums ${m.commodities_excess_liquidity < 0 ? 'text-red-600 font-bold' : 'text-slate-700'}`}>
                 {fmtUSD(m.commodities_excess_liquidity)}
               </td>
@@ -141,7 +143,7 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
               <td className="text-right px-4 py-2 tabular-nums text-slate-600">{fmtUSD(m.futures_maint_margin)}</td>
             </tr>
             <tr className="bg-slate-50 font-semibold">
-              <td className="px-4 py-2">Total</td>
+              <td className="px-4 py-2">{t('合计', 'Total', lang)}</td>
               <td className={`text-right px-4 py-2 tabular-nums ${m.excess_liquidity < 0 ? 'text-red-600' : 'text-green-700'}`}>
                 {fmtUSD(m.excess_liquidity)}
               </td>

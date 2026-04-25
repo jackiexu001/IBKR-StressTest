@@ -15,11 +15,9 @@ export function fmt(value: number, decimals = 0): string {
 }
 
 export function fmtUSD(value: number): string {
-  const abs = Math.abs(value)
+  if (!isFinite(value)) return '—'
   const sign = value < 0 ? '-' : ''
-  if (abs >= 1_000_000) return `${sign}$${fmt(abs / 1_000_000, 2)}M`
-  if (abs >= 1_000) return `${sign}$${fmt(abs / 1_000, 1)}K`
-  return `${sign}$${fmt(abs, 2)}`
+  return `${sign}$${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 export function fmtPct(value: number, decimals = 1): string {

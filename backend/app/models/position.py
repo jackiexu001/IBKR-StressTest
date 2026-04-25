@@ -1,33 +1,56 @@
-from typing import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, field_validator
 
-Market = Literal["US", "HK", "JP", "KR", "SG"]
-Exchange = Literal["CME", "HKEX", "OSE", "KRX", "SGX", "CBOT", "NYMEX"]
-Currency = Literal["USD", "HKD", "JPY", "KRW", "SGD"]
+Market = str
+Exchange = str
+Currency = str
+
+_VALID_MARKETS = {"US", "HK", "JP", "KR", "SG"}
+_VALID_CURRENCIES = {"USD", "HKD", "JPY", "KRW", "SGD"}
+_VALID_EXCHANGES = {"CME", "HKEX", "OSE", "KRX", "SGX", "CBOT", "NYMEX"}
 
 
 class StockPosition(BaseModel):
     id: str
     symbol: str
     name: str = ""
-    market: Market
-    shares: float                    # negative = short
+    market: str = "US"
+    shares: float
     avg_cost: float
     current_price: float
-    currency: Currency
-    initial_margin_rate: float       # e.g. 0.50 for 50%
-    maintenance_margin_rate: float   # e.g. 0.25 for 25%
+    currency: str = "USD"
+    initial_margin_rate: float
+    maintenance_margin_rate: float
+
+    @field_validator("market", mode="before")
+    @classmethod
+    def coerce_market(cls, v: str) -> str:
+        return v if v in _VALID_MARKETS else "US"
+
+    @field_validator("currency", mode="before")
+    @classmethod
+    def coerce_currency(cls, v: str) -> str:
+        return v if v in _VALID_CURRENCIES else "USD"
 
 
 class FuturesPosition(BaseModel):
     id: str
     symbol: str
     name: str = ""
-    exchange: Exchange
-    contracts: float                 # negative = short
+    exchange: str = "CME"
+    contracts: float
     multiplier: float
     avg_entry_price: float
     current_price: float
-    currency: Currency
+    currency: str = "USD"
     initial_margin_per_contract: float
     maintenance_margin_per_contract: float
+
+    @field_validator("exchange", mode="before")
+    @classmethod
+    def coerce_exchange(cls, v: str) -> str:
+        return v if v in _VALID_EXCHANGES else "CME"
+
+    @field_validator("currency", mode="before")
+    @classmethod
+    def coerce_currency(cls, v: str) -> str:
+        return v if v in _VALID_CURRENCIES else "USD"

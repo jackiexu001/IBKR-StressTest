@@ -74,7 +74,12 @@ def get_info(symbol: str):
     """Get contract info (futures from internal DB, stocks from yfinance)."""
     futures_info = get_futures_info(symbol)
     if futures_info:
-        return {**futures_info, "type": "futures"}
+        return {
+            **futures_info,
+            "type": "futures",
+            "typical_im": futures_info.get("typical_im", 0),
+            "typical_mm": futures_info.get("typical_mm", 0),
+        }
 
     try:
         ticker = yf.Ticker(symbol)

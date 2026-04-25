@@ -1,4 +1,5 @@
 import { usePortfolioStore } from '@/store/portfolio'
+import { NumInput } from '@/components/ui/NumInput'
 import { fmtUSD, fmt } from '@/lib/utils'
 import type { PositionDetail } from '@/lib/types'
 
@@ -22,7 +23,7 @@ export function PositionTable({ positionDetails }: Props) {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
                 <tr>
-                  <th className="text-left px-4 py-2">代码</th>
+                  <th className="text-left px-4 py-2">代码 / 名称</th>
                   <th className="text-right px-4 py-2">股数</th>
                   <th className="text-right px-4 py-2">均价</th>
                   <th className="text-right px-4 py-2">现价</th>
@@ -42,6 +43,7 @@ export function PositionTable({ positionDetails }: Props) {
                     <tr key={p.id} className="hover:bg-slate-50">
                       <td className="px-4 py-2">
                         <div className="font-mono font-semibold text-slate-800">{p.symbol}</div>
+                        {p.name && <div className="text-xs text-slate-500 truncate max-w-[140px]">{p.name}</div>}
                         <div className="text-xs text-slate-400">{p.market} · {p.currency}</div>
                       </td>
                       <td className={`text-right px-4 py-2 tabular-nums ${isShort ? 'text-orange-600' : ''}`}>
@@ -50,10 +52,9 @@ export function PositionTable({ positionDetails }: Props) {
                       </td>
                       <td className="text-right px-4 py-2 tabular-nums text-slate-500">{fmt(p.avg_cost, 2)}</td>
                       <td className="text-right px-4 py-2">
-                        <input
-                          type="number"
+                        <NumInput
                           value={p.current_price}
-                          onChange={e => updateStock(p.id, { current_price: parseFloat(e.target.value) || 0 })}
+                          onChange={v => updateStock(p.id, { current_price: v })}
                           className="w-24 text-right border border-transparent hover:border-slate-200 focus:border-blue-400 rounded px-2 py-0.5 text-sm outline-none tabular-nums"
                         />
                       </td>
@@ -87,7 +88,7 @@ export function PositionTable({ positionDetails }: Props) {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
                 <tr>
-                  <th className="text-left px-4 py-2">代码</th>
+                  <th className="text-left px-4 py-2">代码 / 名称</th>
                   <th className="text-right px-4 py-2">合约数</th>
                   <th className="text-right px-4 py-2">开仓价</th>
                   <th className="text-right px-4 py-2">现价</th>
@@ -106,6 +107,7 @@ export function PositionTable({ positionDetails }: Props) {
                     <tr key={p.id} className="hover:bg-slate-50">
                       <td className="px-4 py-2">
                         <div className="font-mono font-semibold text-slate-800">{p.symbol}</div>
+                        {p.name && <div className="text-xs text-slate-500 truncate max-w-[140px]">{p.name}</div>}
                         <div className="text-xs text-slate-400">{p.exchange} · ×{p.multiplier} · {p.currency}</div>
                       </td>
                       <td className={`text-right px-4 py-2 tabular-nums ${isShort ? 'text-orange-600' : ''}`}>
@@ -114,10 +116,9 @@ export function PositionTable({ positionDetails }: Props) {
                       </td>
                       <td className="text-right px-4 py-2 tabular-nums text-slate-500">{fmt(p.avg_entry_price, 2)}</td>
                       <td className="text-right px-4 py-2">
-                        <input
-                          type="number"
+                        <NumInput
                           value={p.current_price}
-                          onChange={e => updateFutures(p.id, { current_price: parseFloat(e.target.value) || 0 })}
+                          onChange={v => updateFutures(p.id, { current_price: v })}
                           className="w-24 text-right border border-transparent hover:border-slate-200 focus:border-blue-400 rounded px-2 py-0.5 text-sm outline-none tabular-nums"
                         />
                       </td>
@@ -142,7 +143,7 @@ export function PositionTable({ positionDetails }: Props) {
       {stocks.length === 0 && futures.length === 0 && (
         <div className="text-center py-12 text-slate-400">
           <p className="text-lg">暂无持仓</p>
-          <p className="text-sm mt-1">请在「持仓管理」页面添加股票或期货持仓</p>
+          <p className="text-sm mt-1">请点击上方按钮添加股票或期货持仓</p>
         </div>
       )}
     </div>

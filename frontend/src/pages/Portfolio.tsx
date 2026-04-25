@@ -1,15 +1,26 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { AccountSetup } from '@/components/portfolio/AccountSetup'
 import { AddStockForm } from '@/components/portfolio/AddStockForm'
 import { AddFuturesForm } from '@/components/portfolio/AddFuturesForm'
 import { PositionTable } from '@/components/portfolio/PositionTable'
 import { usePortfolioStore } from '@/store/portfolio'
+import { api } from '@/lib/api'
 
 type Panel = 'none' | 'stock' | 'futures' | 'account'
 
 export function Portfolio() {
   const [panel, setPanel] = useState<Panel>('none')
-  const { stocks, futures, importPortfolio, reset } = usePortfolioStore()
+  const { stocks, futures, importPortfolio, reset, getPortfolio } = usePortfolioStore()
+
+  const portfolio = getPortfolio()
+  const hasPositions = stocks.length > 0 || futures.length > 0
+  const { data: metrics } = useQuery({
+    queryKey: ['metrics', portfolio],
+    queryFn: () => api.getMetrics(portfolio),
+    enabled: hasPositions,
+    staleTime: 30_000,
+  })
 
   const handleExport = () => {
     const { getPortfolio } = usePortfolioStore.getState()
@@ -127,7 +138,7 @@ export function Portfolio() {
             {stocks.length} 只股票 · {futures.length} 个期货合约
           </span>
         </div>
-        <PositionTable />
+        <PositionTable positionDetails={metrics?.per_position} />
       </div>
     </div>
   )

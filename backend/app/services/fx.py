@@ -1,3 +1,10 @@
+def get_rate(currency: str, fx_rates: dict[str, float]) -> float:
+    """Return the USD exchange rate for a currency (1.0 for USD)."""
+    if currency == "USD":
+        return 1.0
+    return fx_rates.get(currency) or _FALLBACK_RATES.get(currency) or 0.0
+
+
 _FALLBACK_RATES: dict[str, float] = {
     "HKD": 0.1282,
     "JPY": 0.0067,

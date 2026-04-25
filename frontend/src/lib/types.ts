@@ -54,8 +54,10 @@ export interface PositionDetail {
   contracts?: number
   current_price: number
   currency: string
+  fx_rate: number
   market_value_usd?: number
   notional_usd?: number
+  unrealized_pnl_native: number
   unrealized_pnl_usd: number
   initial_margin_usd: number
   maint_margin_usd: number

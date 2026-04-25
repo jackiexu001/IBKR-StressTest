@@ -28,7 +28,7 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
           label="Excess Liquidity"
           labelZh="剩余流动性 ★"
           value={fmtUSD(m.excess_liquidity)}
-          subValue={m.excess_liquidity < 0 ? '⚠ 负数 → 强制平仓' : `Cushion ${fmtPct(m.cushion)}`}
+          subValue={m.excess_liquidity < 0 ? t('⚠ 负数 → 强制平仓', '⚠ Negative → Forced liquidation', lang) : `Cushion ${fmtPct(m.cushion)}`}
           status={status}
           tooltip="ELV - 维持保证金。负数时 IB 开始强制平仓"
         />
@@ -37,7 +37,7 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
           label="Cushion"
           labelZh="安全缓冲比率"
           value={fmtPct(m.cushion)}
-          subValue={`>15% 安全 | >5% 警戒 | <2% 危险`}
+          subValue={t('>15% 安全 | >5% 警戒 | <2% 危险', '>15% Safe | >5% Warn | <2% Danger', lang)}
           status={status}
           tooltip="剩余流动性 / NLV。IB 实时监控此指标"
         />
@@ -56,21 +56,21 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
           labelZh="可用资金"
           value={fmtUSD(m.available_funds)}
           status={m.available_funds < 0 ? 'danger' : 'neutral'}
-          subValue={m.available_funds < 0 ? '无法开新仓' : undefined}
+          subValue={m.available_funds < 0 ? t('无法开新仓', 'Cannot open new positions', lang) : undefined}
           tooltip="ELV - 初始保证金。负数时无法开新仓"
         />
         <MetricCard
           label="Initial Margin"
           labelZh="初始保证金"
           value={fmtUSD(m.total_initial_margin)}
-          subValue={`股票 ${fmtUSD(m.stock_initial_margin)} | 期货 ${fmtUSD(m.futures_initial_margin)}`}
+          subValue={`${t('股票', 'STK', lang)} ${fmtUSD(m.stock_initial_margin)} | ${t('期货', 'FUT', lang)} ${fmtUSD(m.futures_initial_margin)}`}
           tooltip="开新仓所需保证金总额"
         />
         <MetricCard
           label="Maintenance Margin"
           labelZh="维持保证金"
           value={fmtUSD(m.total_maint_margin)}
-          subValue={`股票 ${fmtUSD(m.stock_maint_margin)} | 期货 ${fmtUSD(m.futures_maint_margin)}`}
+          subValue={`${t('股票', 'STK', lang)} ${fmtUSD(m.stock_maint_margin)} | ${t('期货', 'FUT', lang)} ${fmtUSD(m.futures_maint_margin)}`}
           tooltip="维持现有持仓所需最低保证金"
         />
       </div>
@@ -81,28 +81,28 @@ export function MetricsDashboard({ metrics: m }: MetricsDashboardProps) {
           label="Net Market Value"
           labelZh="净持仓市值"
           value={fmtUSD(m.net_market_value)}
-          subValue={`多头 ${fmtUSD(m.long_market_value)}`}
+          subValue={`${t('多头', 'Long', lang)} ${fmtUSD(m.long_market_value)}`}
           tooltip="多头市值 - 空头市值（不含期货名义值）"
         />
         <MetricCard
           label="SMA"
           labelZh="特别备忘账户"
           value={fmtUSD(m.sma)}
-          subValue="快照近似值，可手动覆盖"
+          subValue={t('快照近似值，可手动覆盖', 'Snapshot approx, manually adjustable', lang)}
           tooltip="max(0, ELV - 股票初始保证金)。精确值需完整交易历史"
         />
         <MetricCard
           label="Stock Buying Power"
           labelZh="股票购买力"
           value={fmtUSD(m.stock_buying_power)}
-          subValue="RegT隔夜 2×"
+          subValue={t('RegT隔夜 2×', 'RegT overnight 2×', lang)}
           tooltip="min(ELV, PrevDayELV) - IM × 2"
         />
         <MetricCard
           label="Option Buying Power"
           labelZh="期权购买力"
           value={fmtUSD(m.option_buying_power)}
-          subValue="期权无杠杆 1×"
+          subValue={t('期权无杠杆 1×', 'Options no leverage 1×', lang)}
           tooltip="= 可用资金（期权需100%保证金）"
         />
         <MetricCard

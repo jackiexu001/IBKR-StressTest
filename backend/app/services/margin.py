@@ -20,7 +20,7 @@ import copy
 from app.models.account import Portfolio, Metrics
 from app.models.position import StockPosition, FuturesPosition
 from app.data.market_rules import get_rule
-from app.services.fx import to_usd
+from app.services.fx import to_usd, get_rate
 
 
 def _stock_margins(p: StockPosition, fx: dict) -> tuple[float, float, float]:
@@ -78,7 +78,9 @@ def calc_metrics(portfolio: Portfolio) -> Metrics:
     for p in portfolio.stocks:
         mv, im, mm = _stock_margins(p, fx)
         signed_mv = to_usd(p.shares * p.current_price, p.currency, fx)
-        unrealized = to_usd((p.current_price - p.avg_cost) * p.shares, p.currency, fx)
+        unrealized_native = (p.current_price - p.avg_cost) * p.shares
+        unrealized = to_usd(unrealized_native, p.currency, fx)
+        rate = get_rate(p.currency, fx)
         stock_im += im
         stock_mm += mm
         per_position.append({
@@ -89,7 +91,9 @@ def calc_metrics(portfolio: Portfolio) -> Metrics:
             "shares": p.shares,
             "current_price": p.current_price,
             "currency": p.currency,
+            "fx_rate": rate,
             "market_value_usd": signed_mv,
+            "unrealized_pnl_native": unrealized_native,
             "unrealized_pnl_usd": unrealized,
             "initial_margin_usd": im,
             "maint_margin_usd": mm,
@@ -101,6 +105,8 @@ def calc_metrics(portfolio: Portfolio) -> Metrics:
 
     for p in portfolio.futures:
         notional, im, mm, pnl = _futures_margins(p, fx)
+        pnl_native = (p.current_price - p.avg_entry_price) * p.contracts * p.multiplier
+        rate = get_rate(p.currency, fx)
         futures_im += im
         futures_mm += mm
         per_position.append({
@@ -111,7 +117,9 @@ def calc_metrics(portfolio: Portfolio) -> Metrics:
             "contracts": p.contracts,
             "current_price": p.current_price,
             "currency": p.currency,
+            "fx_rate": rate,
             "notional_usd": notional,
+            "unrealized_pnl_native": pnl_native,
             "unrealized_pnl_usd": pnl,
             "initial_margin_usd": im,
             "maint_margin_usd": mm,

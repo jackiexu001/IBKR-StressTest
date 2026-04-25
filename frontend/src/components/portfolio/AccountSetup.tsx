@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { usePortfolioStore } from '@/store/portfolio'
+import { useLanguageStore, t } from '@/store/language'
 import type { Account, Currency } from '@/lib/types'
 
 const CURRENCIES: Currency[] = ['USD', 'HKD', 'JPY', 'KRW', 'SGD']
 
 export function AccountSetup() {
   const { account, setAccount } = usePortfolioStore()
+  const { lang } = useLanguageStore()
   const [form, setForm] = useState<Account>(account)
 
   const updateFxRate = (currency: Currency, value: string) => {
@@ -20,12 +22,12 @@ export function AccountSetup() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-slate-800">账户设置</h2>
+      <h2 className="text-lg font-semibold text-slate-800">{t('账户设置', 'Account Setup', lang)}</h2>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
-            Total Cash Value（从 IB TWS 复制）
+            Total Cash Value {t('（从 IB TWS 复制）', '(copy from IB TWS)', lang)}
           </label>
           <div className="flex gap-2">
             <input
@@ -43,19 +45,21 @@ export function AccountSetup() {
               {CURRENCIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
-          <p className="text-xs text-slate-400 mt-1">含期货每日结算盈亏，含卖空收益</p>
+          <p className="text-xs text-slate-400 mt-1">
+            {t('含期货每日结算盈亏，含卖空收益', 'Includes futures daily settlement and short proceeds', lang)}
+          </p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
-            Previous Day ELV（可选，用于精确计算购买力）
+            Previous Day ELV {t('（可选，用于精确计算购买力）', '(optional, for accurate buying power)', lang)}
           </label>
           <input
             type="number"
             value={form.prev_day_elv ?? ''}
             onChange={e => setForm(f => ({ ...f, prev_day_elv: parseFloat(e.target.value) || undefined }))}
             className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-            placeholder="留空则用当日 ELV"
+            placeholder={t('留空则用当日 ELV', 'Leave blank to use current ELV', lang)}
           />
         </div>
       </div>
@@ -63,7 +67,7 @@ export function AccountSetup() {
       {/* FX Rates */}
       <div>
         <h3 className="text-sm font-medium text-slate-700 mb-2">
-          汇率（外币 → USD，e.g. HKD: 0.1282）
+          {t('汇率（外币 → USD，e.g. HKD: 0.1282）', 'FX Rates (foreign → USD, e.g. HKD: 0.1282)', lang)}
         </h3>
         <div className="grid grid-cols-4 gap-3">
           {(['HKD', 'JPY', 'KRW', 'SGD'] as Currency[]).map(cur => (
@@ -86,7 +90,7 @@ export function AccountSetup() {
         onClick={save}
         className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
       >
-        保存账户设置
+        {t('保存账户设置', 'Save Account Settings', lang)}
       </button>
     </div>
   )

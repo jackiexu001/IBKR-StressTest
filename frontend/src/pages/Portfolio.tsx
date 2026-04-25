@@ -5,6 +5,7 @@ import { AddStockForm } from '@/components/portfolio/AddStockForm'
 import { AddFuturesForm } from '@/components/portfolio/AddFuturesForm'
 import { PositionTable } from '@/components/portfolio/PositionTable'
 import { usePortfolioStore } from '@/store/portfolio'
+import { useLanguageStore, t } from '@/store/language'
 import { api } from '@/lib/api'
 
 type Panel = 'none' | 'stock' | 'futures' | 'account'
@@ -12,6 +13,7 @@ type Panel = 'none' | 'stock' | 'futures' | 'account'
 export function Portfolio() {
   const [panel, setPanel] = useState<Panel>('none')
   const { stocks, futures, importPortfolio, reset, getPortfolio } = usePortfolioStore()
+  const { lang } = useLanguageStore()
 
   const portfolio = getPortfolio()
   const hasPositions = stocks.length > 0 || futures.length > 0
@@ -46,14 +48,14 @@ export function Portfolio() {
         const data = JSON.parse(text)
         importPortfolio(data)
       } catch {
-        alert('JSON 格式错误，导入失败')
+        alert(t('JSON 格式错误，导入失败', 'Invalid JSON format', lang))
       }
     }
     input.click()
   }
 
   const handleReset = () => {
-    if (confirm('确定要清空所有持仓和账户数据吗？')) reset()
+    if (confirm(t('确定要清空所有持仓和账户数据吗？', 'Clear all positions and account data?', lang))) reset()
   }
 
   return (
@@ -69,7 +71,7 @@ export function Portfolio() {
                 : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
             }`}
           >
-            + 添加股票
+            + {t('添加股票', 'Add Stock', lang)}
           </button>
           <button
             onClick={() => setPanel(panel === 'futures' ? 'none' : 'futures')}
@@ -79,7 +81,7 @@ export function Portfolio() {
                 : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
             }`}
           >
-            + 添加期货
+            + {t('添加期货', 'Add Futures', lang)}
           </button>
           <button
             onClick={() => setPanel(panel === 'account' ? 'none' : 'account')}
@@ -89,7 +91,7 @@ export function Portfolio() {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            账户设置
+            {t('账户设置', 'Account Setup', lang)}
           </button>
         </div>
 
@@ -98,19 +100,19 @@ export function Portfolio() {
             onClick={handleImport}
             className="px-3 py-1.5 rounded-lg text-xs text-slate-600 border hover:bg-slate-50"
           >
-            导入 JSON
+            {t('导入 JSON', 'Import JSON', lang)}
           </button>
           <button
             onClick={handleExport}
             className="px-3 py-1.5 rounded-lg text-xs text-slate-600 border hover:bg-slate-50"
           >
-            导出 JSON
+            {t('导出 JSON', 'Export JSON', lang)}
           </button>
           <button
             onClick={handleReset}
             className="px-3 py-1.5 rounded-lg text-xs text-red-500 border border-red-200 hover:bg-red-50"
           >
-            清空数据
+            {t('清空数据', 'Clear All', lang)}
           </button>
         </div>
       </div>
@@ -133,12 +135,12 @@ export function Portfolio() {
       {/* Position list */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-slate-800">持仓列表</h2>
+          <h2 className="text-base font-semibold text-slate-800">{t('持仓列表', 'Positions', lang)}</h2>
           <span className="text-sm text-slate-400">
-            {stocks.length} 只股票 · {futures.length} 个期货合约
+            {stocks.length} {t('只股票', 'stocks', lang)} · {futures.length} {t('个期货合约', 'futures', lang)}
           </span>
         </div>
-        <PositionTable positionDetails={metrics?.per_position} />
+        <PositionTable positionDetails={metrics?.per_position} showDelete={true} />
       </div>
     </div>
   )

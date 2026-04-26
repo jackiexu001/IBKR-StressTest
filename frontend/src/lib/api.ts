@@ -4,7 +4,9 @@ import type {
   HeatmapResult, InstrumentSearchResult,
 } from './types'
 
-const http = axios.create({ baseURL: '/api' })
+const http = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+})
 
 export const api = {
   getMetrics: (portfolio: Portfolio) =>
